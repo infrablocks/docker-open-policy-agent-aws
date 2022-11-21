@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 describe 'open policy agent' do
-  image = 'open-policy-agent-aws:latest'
+  image = 'open-policy-agent-aws-lambda:latest'
   extra = {
     'Entrypoint' => '/bin/sh'
   }
@@ -18,8 +18,8 @@ describe 'open policy agent' do
     after(:all, &:reset_docker_backend)
 
     it 'includes the opa command' do
-      expect(command('opa --version').stdout)
-        .to(match(/x\.y\.0/))
+      expect(command('/opa/opa version').stdout)
+        .to(match(/0.46.1/))
     end
   end
 
