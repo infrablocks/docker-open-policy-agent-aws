@@ -23,9 +23,9 @@ while true; do
   rm /tmp/event.data
 
   # Remove leading / in OPA path if included in request
-    length=${#OPA_PATH}
-    first_char=${OPA_PATH:0:1}
-    [[ $first_char == "/" ]] && OPA_PATH=${OPA_PATH:1:length-1}
+  length=${#OPA_PATH}
+  first_char=${OPA_PATH:0:1}
+  [[ $first_char == "/" ]] && OPA_PATH=${OPA_PATH:1:length-1}
   echo $first_char
   echo $OPA_PATH
 

@@ -9,12 +9,12 @@ trap exit_script SIGINT SIGTERM
 
 # Run OPA in sever mode and load bundle
 echo "Starting Open Policy Agent"
-exec /opa/opa run -s /opa/ &
+exec /opt/opa/bin/opa run -s /opt/opa/ &
 
 # If running locally load Runtime Interface Emulator and handler,
 # otherwise just handler
 if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
-    echo "Running Locally - Starting RIE and Handler"
+    echo "Running Locally - Starting RIE and Handler..."
     exec /usr/local/bin/aws-lambda-rie /var/runtime/bootstrap.sh
 else
     echo "Running on Lambda - Starting Handler..."
