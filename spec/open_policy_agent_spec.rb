@@ -18,7 +18,7 @@ describe 'open policy agent' do
     after(:all, &:reset_docker_backend)
 
     it 'includes the opa command' do
-      expect(command('/opa/opa version').stdout)
+      expect(command('/opt/opa/bin/opa version').stdout)
         .to(match(/0.46.1/))
     end
   end
