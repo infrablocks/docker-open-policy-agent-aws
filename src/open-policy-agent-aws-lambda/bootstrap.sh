@@ -20,44 +20,44 @@ while true; do
 
   echo "Fetching next request from Lambda..."
   # Lambda will block until an event is received
-  HEADERS="$(mktemp)"
+  headers="$(mktemp)"
   curl -sS \
-    -LD "$HEADERS" \
+    -LD "$headers" \
     -X GET "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/next" \
     -o /tmp/event.data
 
   echo "Request received. Processing..."
 
-  REQUEST_ID=$(grep -Fi Lambda-Runtime-Aws-Request-Id "$HEADERS" | tr -d '[:space:]' | cut -d: -f2)
+  request_id=$(grep -Fi Lambda-Runtime-Aws-Request-Id "$headers" | tr -d '[:space:]' | cut -d: -f2)
 
-  echo "Request ID is: ${REQUEST_ID}."
+  echo "Request ID is: ${request_id}."
   echo "Invocation event is: $(cat /tmp/event.data)"
-  echo "Invocation headers are: $(cat $HEADERS)"
+  echo "Invocation headers are: $(cat $headers)"
 
   echo "Reading and normalising request parameters..."
 
-  OPA_PATH=$(jq -r ".x_opa_path" </tmp/event.data)
-  OPA_METHOD=$(jq -r ".x_opa_method" </tmp/event.data)
-  OPA_PAYLOAD=$(jq -r  ".x_opa_payload" </tmp/event.data)
+  opa_path=$(jq -r ".x_opa_path" </tmp/event.data)
+  opa_method=$(jq -r ".x_opa_method" </tmp/event.data)
+  opa_payload=$(jq -r  ".x_opa_payload" </tmp/event.data)
   rm /tmp/event.data
 
-  length=${#OPA_PATH}
-  first_char=${OPA_PATH:0:1}
-  [[ $first_char == "/" ]] && OPA_PATH=${OPA_PATH:1:length-1}
+  length=${#opa_path}
+  first_char=${opa_path:0:1}
+  [[ $first_char == "/" ]] && opa_path=${opa_path:1:length-1}
 
-  echo "Request path is: ${OPA_PATH}"
-  echo "Request method is: ${OPA_METHOD}"
-  echo "Request payload is: ${OPA_PAYLOAD}"
+  echo "Request path is: ${opa_path}"
+  echo "Request method is: ${opa_method}"
+  echo "Request payload is: ${opa_payload}"
 
   echo "Passing request to OPA..."
-  RESPONSE=$(curl -s -X "$OPA_METHOD" "http://127.0.0.1:8181/${OPA_PATH}" -d "$OPA_PAYLOAD" -H "Content-Type: application/json")
+  response=$(curl -s -X "$opa_method" "http://127.0.0.1:8181/${opa_path}" -d "$opa_payload" -H "Content-Type: application/json")
 
-  echo "OPA response is: ${RESPONSE}"
+  echo "OPA response is: ${response}"
 
   echo "Sending response to Lambda..."
   curl -s \
-    -X POST "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$REQUEST_ID/response" \
-    -d "$RESPONSE" \
+    -X POST "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$request_id/response" \
+    -d "$response" \
     -H "Content-Type: application/json"
 
   echo "Request poll complete..."

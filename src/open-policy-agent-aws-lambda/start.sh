@@ -22,7 +22,12 @@ exec /opt/opa/bin/opa run \
   --server \
   --disable-telemetry \
   --log-level debug \
-  --bundle /opt/opa/ &
+  /opt/opa/ &
+
+address="http://127.0.0.1:8181"
+until $(curl --output /dev/null --silent --head --fail $address); do
+  sleep 0.05
+done
 echo "Started Open Policy Agent"
 
 # If running locally load Runtime Interface Emulator and handler,
