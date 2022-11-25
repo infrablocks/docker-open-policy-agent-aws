@@ -11,6 +11,7 @@ trap exit_script SIGINT SIGTERM
 echo "Starting Open Policy Agent..."
 exec /opt/opa/bin/opa run \
   --server \
+  --disable-telemetry \
   --log-level debug \
   --bundle /opt/opa/ &
 echo "Started Open Policy Agent"

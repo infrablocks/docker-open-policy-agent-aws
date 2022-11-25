@@ -41,7 +41,7 @@ while true; do
   echo "Request payload is: ${OPA_PAYLOAD}"
 
   echo "Passing request to OPA..."
-  RESPONSE=$(curl -s -X POST "http://localhost:8181/${OPA_PATH}" -d "$OPA_PAYLOAD" -H "Content-Type: application/json")
+  RESPONSE=$(curl -s -X "$OPA_METHOD" "http://localhost:8181/${OPA_PATH}" -d "$OPA_PAYLOAD" -H "Content-Type: application/json")
 
   echo "OPA response is: ${RESPONSE}"
 

@@ -2,7 +2,7 @@
 #
 # require 'spec_helper'
 # require 'net/http'
-# require 'uri'
+# require 'json'
 #
 # describe 'entrypoint' do
 #   image = 'open-policy-agent-aws-lambda:latest'
@@ -34,15 +34,23 @@
 #     it 'runs opa' do
 #       sleep 20
 #       http = Net::HTTP.new('localhost', 9000)
-#       response = http.request(
-#         Net::HTTP::Post.new(
-#           '/2015-03-31/functions/function/invocations', {}
-#         )
+#       request = Net::HTTP::Post.new(
+#         '/2015-03-31/functions/function/invocations',
+#         'Content-Type' => 'application/json'
 #       )
-#       puts response
+#       request.body = {
+#         x_opa_path: '/v1/policies',
+#         x_opa_method: 'GET',
+#         x_opa_payload: {}
+#       }.to_json
+#       response = http.request(request)
+#       puts "RESPONSE:::::::::::::::::::::::::::"
+#       puts response.body
+#
+#       puts "LOG:::::::::::::::::::::::::::"
 #       log = command('cat /tmp/lambda-entrypoint.log').stdout
 #       puts log
-#       sleep 60
+#
 #       expect(process('/opt/opa/bin/opa')).to(be_running)
 #     end
 #   end
