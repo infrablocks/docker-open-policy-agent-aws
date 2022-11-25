@@ -2,10 +2,12 @@
 
 require 'bundler/setup'
 require 'docker'
+require 'octopoller'
 require 'serverspec'
 require 'shellwords'
 
 RSpec.configure do |config|
+  config.filter_run_when_matching :focus
   config.example_status_persistence_file_path = '.rspec_status'
   config.expect_with :rspec do |c|
     c.syntax = :expect

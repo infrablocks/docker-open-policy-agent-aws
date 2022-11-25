@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'open policy agent' do
+describe 'commands' do
   image = 'open-policy-agent-aws-lambda:latest'
   extra = {
     'Entrypoint' => '/bin/sh'
