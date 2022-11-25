@@ -24,8 +24,10 @@ exec /opt/opa/bin/opa run \
   --log-level debug \
   /opt/opa/ &
 
-address="http://127.0.0.1:8181"
-until $(curl --output /dev/null --silent --head --fail $address); do
+echo "Waiting for Open Policy Agent to be healthy..."
+address="http://127.0.0.1:8181/health"
+while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' $address)" != "200" ]]; do
+  echo "Not healthy yet. Waiting 50ms..."
   sleep 0.05
 done
 echo "Started Open Policy Agent"
