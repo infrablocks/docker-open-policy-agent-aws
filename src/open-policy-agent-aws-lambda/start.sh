@@ -7,6 +7,15 @@ exit_script() {
 }
 trap exit_script SIGINT SIGTERM
 
+echo "Checking some things..."
+echo "Environment is:"
+echo $(env)
+echo "Running as:"
+echo $(whoami)
+echo "OPA directory looks like:"
+echo $(ls -la /opt/opa)
+echo $(ls -la /opt/opa/bin)
+
 # Run OPA in sever mode and load policies
 echo "Starting Open Policy Agent..."
 exec /opt/opa/bin/opa run \

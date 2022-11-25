@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -euo pipefail
+# set -euo pipefail
 
 echo "Starting request handling loop..."
 
