@@ -66,15 +66,15 @@ while true; do
     --write-out '{"headers": %{header_json}, "others": %{json}}' \
     "http://127.0.0.1:8181/${path}" > "$response_data_file"
 
-  body=$(cat "$response_body_file")
+  body=$(jq -R -s "." < "$response_body_file")
   statusCode=$(jq -r ".others.response_code" < "$response_data_file")
-  headers=$(jq -r ".headers" < "$response_data_file")
+  headers=$(jq -r ".headers" < "$response_data_file" | sed -r 's/"/\\"/g')
 
   echo "Response status code is: ${statusCode}"
   echo "Response headers are: ${headers}"
   echo "Response body is: ${body}"
 
-  response="{\"isBase64Encoded\": false, \"statusCode\": $statusCode, \"body\": \"$body\"}"
+  response="{\"isBase64Encoded\": false, \"statusCode\": $statusCode, \"body\": $body, \"multiValueHeaders\": $headers}"
 
   echo "OPA response is: ${response}"
 
