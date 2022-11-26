@@ -51,7 +51,7 @@ while true; do
 
   echo "Request path is: ${path}"
   echo "Request method is: ${method}"
-  echo "Request payload is: ${payload}"
+  printf "Request payload is: %s\n" "${payload}"
 
   echo "Passing request to OPA..."
   response_data_file="$(mktemp)"
@@ -66,17 +66,17 @@ while true; do
     --write-out '{"headers": %{header_json}, "others": %{json}}' \
     "http://127.0.0.1:8181/${path}" > "$response_data_file"
 
-  body=$(jq -R -s "." < "$response_body_file")
+  body=$(jq -c -r "." < "$response_body_file" | jq -R -s ".")
   statusCode=$(jq -r ".others.response_code" < "$response_data_file")
-  headers=$(jq -r ".headers" < "$response_data_file" | sed -r 's/"/\\"/g')
+  headers=$(jq -c -r ".headers" < "$response_data_file")
 
-  echo "Response status code is: ${statusCode}"
-  echo "Response headers are: ${headers}"
-  echo "Response body is: ${body}"
+  printf "Response status code is: %s\n" "${statusCode}"
+  printf "Response headers are: %s\n" "${headers}"
+  printf "Response body is: %s\n" "${body}"
 
   response="{\"isBase64Encoded\": false, \"statusCode\": $statusCode, \"body\": $body, \"multiValueHeaders\": $headers}"
 
-  echo "OPA response is: ${response}"
+  printf "OPA response is: %s\n" "${response}"
 
   echo "Sending response to Lambda..."
   /opt/opa/bin/curl \
