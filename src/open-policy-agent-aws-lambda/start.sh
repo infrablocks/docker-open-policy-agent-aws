@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Gracefully exit if killed
 exit_script() {
@@ -9,12 +9,12 @@ trap exit_script SIGINT SIGTERM
 
 echo "Checking some things..."
 echo "Environment is:"
-echo $(env)
+env
 echo "Running as:"
-echo $(whoami)
+whoami
 echo "OPA directory looks like:"
-echo $(ls -la /opt/opa)
-echo $(ls -la /opt/opa/bin)
+ls -la /opt/opa
+ls -la /opt/opa/bin
 
 # Run OPA in sever mode and load policies
 echo "Starting Open Policy Agent..."
@@ -26,7 +26,7 @@ exec /opt/opa/bin/opa run \
 
 echo "Waiting for Open Policy Agent to be healthy..."
 address="http://127.0.0.1:8181/health"
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' $address)" != "200" ]]; do
+while [[ "$(curl -s -o /dev/null -w '%{http_code}' $address)" != "200" ]]; do
   echo "Not healthy yet. Waiting 50ms..."
   sleep 0.05
 done

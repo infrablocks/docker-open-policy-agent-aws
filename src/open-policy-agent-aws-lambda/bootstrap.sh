@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
-# set -euo pipefail
+set -euo pipefail
 
 echo "Checking some things..."
 echo "Environment is:"
-echo $(env)
+env
 echo "Running as:"
-echo $(whoami)
+whoami
 echo "OPA directory looks like:"
-echo $(ls -la /opt/opa)
-echo $(ls -la /opt/opa/bin)
+ls -la /opt/opa
+ls -la /opt/opa/bin
 
 echo "Starting request handling loop..."
 
@@ -22,7 +22,7 @@ while true; do
   # Lambda will block until an event is received
   lambda_headers_file="$(mktemp)"
   lambda_event_file="$(mktemp)"
-  curl \
+  /opt/opa/bin/curl \
     --silent \
     --show-error \
     --location \
@@ -57,7 +57,7 @@ while true; do
   response_data_file="$(mktemp)"
   response_body_file="$(mktemp)"
 
-  curl \
+  /opt/opa/bin/curl \
     --silent \
     --request "$method" \
     --data "$payload" \
@@ -79,7 +79,7 @@ while true; do
   echo "OPA response is: ${response}"
 
   echo "Sending response to Lambda..."
-  curl \
+  /opt/opa/bin/curl \
     --silent \
     --request "POST" \
     --data "$response" \
