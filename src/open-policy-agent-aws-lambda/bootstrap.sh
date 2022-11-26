@@ -20,26 +20,30 @@ while true; do
 
   echo "Fetching next request from Lambda..."
   # Lambda will block until an event is received
-  headers="$(mktemp)"
-  curl -sS \
-    -LD "$headers" \
-    -X GET "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/next" \
-    -o /tmp/event.data
+  lambda_headers_file="$(mktemp)"
+  lambda_event_file="$(mktemp)"
+  curl \
+    --silent \
+    --show-error \
+    --location \
+    --dump-header "$lambda_headers_file" \
+    --request GET \
+    --output "$lambda_event_file" \
+    "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/next"
 
   echo "Request received. Processing..."
 
-  request_id=$(grep -Fi Lambda-Runtime-Aws-Request-Id "$headers" | tr -d '[:space:]' | cut -d: -f2)
+  request_id=$(grep -Fi Lambda-Runtime-Aws-Request-Id "$lambda_headers_file" | tr -d '[:space:]' | cut -d: -f2)
 
   echo "Request ID is: ${request_id}."
-  echo "Invocation event is: $(cat /tmp/event.data)"
-  echo "Invocation headers are: $(cat $headers)"
+  echo "Invocation event is: $(cat "$lambda_event_file")"
+  echo "Invocation headers are: $(cat "$lambda_headers_file")"
 
   echo "Reading and normalising request parameters..."
 
-  path=$(jq -r ".path" < /tmp/event.data)
-  method=$(jq -r ".httpMethod" < /tmp/event.data)
-  payload=$(jq -r  ".body" < /tmp/event.data)
-  rm /tmp/event.data
+  path=$(jq -r ".path" < "$lambda_event_file")
+  method=$(jq -r ".httpMethod" < "$lambda_event_file")
+  payload=$(jq -r  ".body" < "$lambda_event_file")
 
   length=${#path}
   first_char=${path:0:1}
@@ -50,23 +54,24 @@ while true; do
   echo "Request payload is: ${payload}"
 
   echo "Passing request to OPA..."
+  response_data_file="$(mktemp)"
+  response_body_file="$(mktemp)"
+
   curl \
     --silent \
     --request "$method" \
     --data "$payload" \
     --header "Content-Type: application/json" \
-    --output /tmp/body.data \
+    --output "$response_body_file" \
     --write-out '{"headers": %{header_json}, "others": %{json}}' \
-    "http://127.0.0.1:8181/${path}" > /tmp/response.data
+    "http://127.0.0.1:8181/${path}" > "$response_data_file"
 
-  body=$(cat /tmp/body.data)
-  statusCode=$(jq -r ".others.response_code" < /tmp/response.data)
-  headers=$(jq -r ".headers" < /tmp/response.data)
-  rm /tmp/body.data
-  rm /tmp/response.data
+  body=$(cat "$response_body_file")
+  statusCode=$(jq -r ".others.response_code" < "$response_data_file")
+  headers=$(jq -r ".headers" < "$response_data_file")
 
   echo "Response status code is: ${statusCode}"
-  echo "Response headers are: ${}"
+  echo "Response headers are: ${headers}"
   echo "Response body is: ${body}"
 
   response="{\"isBase64Encoded\": false, \"statusCode\": $statusCode, \"body\": \"$body\"}"
