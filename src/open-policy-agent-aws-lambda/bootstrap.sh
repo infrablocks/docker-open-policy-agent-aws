@@ -36,21 +36,21 @@ while true; do
 
   echo "Reading and normalising request parameters..."
 
-  opa_path=$(jq -r ".x_opa_path" </tmp/event.data)
-  opa_method=$(jq -r ".x_opa_method" </tmp/event.data)
-  opa_payload=$(jq -r  ".x_opa_payload" </tmp/event.data)
+  path=$(jq -r ".path" </tmp/event.data)
+  method=$(jq -r ".httpMethod" </tmp/event.data)
+  payload=$(jq -r  ".body" </tmp/event.data)
   rm /tmp/event.data
 
-  length=${#opa_path}
-  first_char=${opa_path:0:1}
-  [[ $first_char == "/" ]] && opa_path=${opa_path:1:length-1}
+  length=${#path}
+  first_char=${path:0:1}
+  [[ $first_char == "/" ]] && path=${path:1:length-1}
 
-  echo "Request path is: ${opa_path}"
-  echo "Request method is: ${opa_method}"
-  echo "Request payload is: ${opa_payload}"
+  echo "Request path is: ${path}"
+  echo "Request method is: ${method}"
+  echo "Request payload is: ${payload}"
 
   echo "Passing request to OPA..."
-  response=$(curl -s -X "$opa_method" "http://127.0.0.1:8181/${opa_path}" -d "$opa_payload" -H "Content-Type: application/json")
+  response=$(curl -s -X "$method" "http://127.0.0.1:8181/${path}" -d "$payload" -H "Content-Type: application/json")
 
   echo "OPA response is: ${response}"
 
