@@ -36,9 +36,9 @@ while true; do
 
   echo "Reading and normalising request parameters..."
 
-  path=$(jq -r ".path" </tmp/event.data)
-  method=$(jq -r ".httpMethod" </tmp/event.data)
-  payload=$(jq -r  ".body" </tmp/event.data)
+  path=$(jq -r ".path" < /tmp/event.data)
+  method=$(jq -r ".httpMethod" < /tmp/event.data)
+  payload=$(jq -r  ".body" < /tmp/event.data)
   rm /tmp/event.data
 
   length=${#path}
@@ -50,15 +50,36 @@ while true; do
   echo "Request payload is: ${payload}"
 
   echo "Passing request to OPA..."
-  response=$(curl -s -X "$method" "http://127.0.0.1:8181/${path}" -d "$payload" -H "Content-Type: application/json")
+  curl \
+    --silent \
+    --request "$method" \
+    --data "$payload" \
+    --header "Content-Type: application/json" \
+    --output /tmp/body.data \
+    --write-out '{"headers": %{header_json}, "others": %{json}}' \
+    "http://127.0.0.1:8181/${path}" > /tmp/response.data
+
+  body=$(cat /tmp/body.data)
+  statusCode=$(jq -r ".others.response_code" < /tmp/response.data)
+  headers=$(jq -r ".headers" < /tmp/response.data)
+  rm /tmp/body.data
+  rm /tmp/response.data
+
+  echo "Response status code is: ${statusCode}"
+  echo "Response headers are: ${}"
+  echo "Response body is: ${body}"
+
+  response="{\"isBase64Encoded\": false, \"statusCode\": $statusCode, \"body\": \"$body\"}"
 
   echo "OPA response is: ${response}"
 
   echo "Sending response to Lambda..."
-  curl -s \
-    -X POST "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$request_id/response" \
-    -d "$response" \
-    -H "Content-Type: application/json"
+  curl \
+    --silent \
+    --request "POST" \
+    --data "$response" \
+    --header "Content-Type: application/json" \
+    "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$request_id/response"
 
   echo "Request poll complete..."
 done
