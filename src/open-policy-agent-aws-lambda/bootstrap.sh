@@ -33,7 +33,7 @@ while true; do
 
   path=$(jq -r ".path" < "$lambda_event_file")
   method=$(jq -r ".httpMethod" < "$lambda_event_file")
-  request_body=$(jq -r  ".response_body" < "$lambda_event_file")
+  request_body=$(jq -r  ".body" < "$lambda_event_file")
 
   echo "{\"message\": \"Parsed request parameters.\","\
        "\"requestId\": \"${request_id}\", \"path\": \"${path}\","\
