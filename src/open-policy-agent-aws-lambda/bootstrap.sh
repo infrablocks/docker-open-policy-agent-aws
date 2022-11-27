@@ -53,14 +53,19 @@ while true; do
     --write-out '{"headers": %{header_json}, "others": %{json}}' \
     "http://127.0.0.1:8181${path}" > "$response_data_file"
 
-  response_body=$(jq -c -r "." < "$response_body_file" | jq -R -s ".")
   status_code=$(jq -r ".others.response_code" < "$response_data_file")
   headers=$(jq -c -r ".headers" < "$response_data_file")
+  if parsed=$(jq -c -r "." < "$response_body_file" | jq -R -s "."); then
+    response_body=$parsed
+  else
+    response_body="$(cat "$response_body_file")"
+  fi
 
   echo "{\"message\": \"Received response from OPA.\","\
        "\"requestId\": \"${request_id}\","\
        "\"statusCode\": \"${status_code}\","\
-       "\"headers\": ${headers}, \"body\": ${response_body}}"
+       "\"headers\": ${headers},"\
+       "\"body\": ${response_body}}"
 
   response="{"
   response+="\"isBase64Encoded\": false, "
