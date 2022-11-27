@@ -28,7 +28,9 @@ echo '{"message": "Started Open Policy Agent"}'
 echo '{"message": "Starting request handler..."}'
 if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
     echo '{"message": "Running locally - starting RIE and request handler..."}'
-    exec /usr/local/bin/aws-lambda-rie --log-level debug /var/runtime/bootstrap.sh
+    exec /usr/local/bin/aws-lambda-rie \
+      --log-level debug \
+      /var/runtime/bootstrap.sh
 else
     echo '{"message": "Running on Lambda - starting request handler..."}'
     exec /var/runtime/bootstrap.sh
