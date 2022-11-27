@@ -55,10 +55,11 @@ while true; do
 
   status_code=$(jq -r ".others.response_code" < "$response_data_file")
   headers=$(jq -c -r ".headers" < "$response_data_file")
-  if parsed=$(jq -c -r "." < "$response_body_file" | jq -R -s "."); then
-    response_body=$parsed
+  if escaped_json=$(jq -c -r "." < "$response_body_file" 2>/dev/null | \
+                    jq -R -s "."); then
+    response_body=$escaped_json
   else
-    response_body="$(cat "$response_body_file")"
+    response_body="\"$(cat "$response_body_file")\""
   fi
 
   echo "{\"message\": \"Received response from OPA.\","\
