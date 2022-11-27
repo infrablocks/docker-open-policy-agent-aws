@@ -2,43 +2,34 @@
 
 # Gracefully exit if killed
 exit_script() {
-    echo "Shutting down..."
+    echo '{"message": "Shutting down..."}'
     trap - SIGINT SIGTERM # clear the trap
 }
 trap exit_script SIGINT SIGTERM
 
-echo "Checking some things..."
-echo "Environment is:"
-env
-echo "Running as:"
-whoami
-echo "OPA directory looks like:"
-ls -la /opt/opa
-ls -la /opt/opa/bin
-
 # Run OPA in sever mode and load policies
-echo "Starting Open Policy Agent..."
+echo '{"message": "Starting Open Policy Agent..."}'
 exec /opt/opa/bin/opa run \
   --server \
   --disable-telemetry \
   --log-level debug \
   /opt/opa/ &
 
-echo "Waiting for Open Policy Agent to be healthy..."
+echo '{"message": "Waiting for Open Policy Agent to be healthy..."}'
 address="http://127.0.0.1:8181/health"
 while [[ "$(curl -s -o /dev/null -w '%{http_code}' $address)" != "200" ]]; do
-  echo "Not healthy yet. Waiting 50ms..."
+  echo '{"message": "Not healthy yet. Waiting 50ms..."}'
   sleep 0.05
 done
-echo "Started Open Policy Agent"
+echo '{"message": "Started Open Policy Agent"}'
 
 # If running locally load Runtime Interface Emulator and handler,
 # otherwise just handler
-echo "Starting request handler..."
+echo '{"message": "Starting request handler..."}'
 if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
-    echo "Running locally - starting RIE and request handler..."
+    echo '{"message": "Running locally - starting RIE and request handler..."}'
     exec /usr/local/bin/aws-lambda-rie --log-level debug /var/runtime/bootstrap.sh
 else
-    echo "Running on Lambda - starting request handler..."
+    echo '{"message": "Running on Lambda - starting request handler..."}'
     exec /var/runtime/bootstrap.sh
 fi
