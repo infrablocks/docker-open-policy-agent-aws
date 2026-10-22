@@ -5,7 +5,7 @@ require 'spec_helper'
 describe 'commands' do
   image = 'open-policy-agent-aws-lambda:latest'
   extra = {
-    'Entrypoint' => '/bin/sh'
+    'Entrypoint' => ['/bin/sh']
   }
 
   before(:all) do

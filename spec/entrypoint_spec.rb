@@ -8,7 +8,7 @@
 # describe 'entrypoint' do
 #   image = 'open-policy-agent-aws-lambda:latest'
 #   extra = {
-#     'Entrypoint' => '/bin/sh',
+#     'Entrypoint' => ['/bin/sh'],
 #     'ExposedPorts' => { '8080/tcp' => {} },
 #     'PortBindings' => {
 #       '8080/tcp' => [
